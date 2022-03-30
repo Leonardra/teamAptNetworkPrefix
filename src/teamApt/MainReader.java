@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class MainReader {
 
@@ -30,19 +31,23 @@ public class MainReader {
     }
 
     public static void readEachLine(BufferedReader reader) throws IOException {
-
         reader.lines().forEach(MainReader::hasMatchingSubstring);
+    }
+
+    private static <K, V> Stream<Map.Entry<K, V>> mapToStream (Map<K, V> map) {
+        return map.entrySet().stream();
     }
 
     private static void hasMatchingSubstring(String line) {
 
-        for (Map.Entry< String, List<String>> set : networkPrefixes.entrySet()) {
-            for (String prefix : set.getValue()) {
-                if(line.startsWith(prefix)) {
-                    networkCount.put(set.getKey(),networkCount.get(set.getKey()) +line.split(",").length);
-                }
+        Stream<Map.Entry<String, List<String>>> stream = mapToStream(networkPrefixes);
+
+        stream.forEach(set -> set.getValue().forEach((prefix) -> {
+            if (line.startsWith(prefix)) {
+                networkCount.put(set.getKey(),networkCount.get(set.getKey()) +line.split(",").length);
             }
-        }
+        })
+        );
     }
 
     public static void assignValuesToMap(){
@@ -58,8 +63,9 @@ public class MainReader {
     }
 
     private static void printNetworkSummary(){
-        for (Map.Entry< String, Integer> set : networkCount.entrySet()){
+        Stream<Map.Entry<String, Integer>> stream = mapToStream(networkCount);
+        stream.forEach(set -> {
             System.out.println(set.getKey() + "\t| " + set.getValue());
-        }
+        });
     }
 }
